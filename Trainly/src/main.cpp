@@ -34,14 +34,6 @@ void init()
         printf("SDL could not create window! SDL_Error: %s\n", SDL_GetError());
     }
 
-    
-    // imgui
-
-
-    
-    // d3d11
-
-
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(m_window, &wmInfo);
@@ -69,6 +61,8 @@ void frame()
     graphics->Clear(37, 121, 231);
 
     counter += t.DeltaTime();
+
+    // graphics->DrawString(std::string(t.DeltaTime()), "comic"));
 
     graphics->DrawTraingle(counter, input);
 
@@ -130,6 +124,8 @@ void run()
         SDL_GetMouseState(&x, &y);
         input.SetMousePosition({ (float)x , (float)y });
     }
+
+
     clean();
 }
 

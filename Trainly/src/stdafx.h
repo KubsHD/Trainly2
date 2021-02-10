@@ -87,8 +87,12 @@ namespace DX
 #include <DirectXMath.h>
 #include <cmath>
 
+#include <SpriteBatch.h>
+#include <SpriteFont.h>
 
 
 #include <SimpleMath.h>
 
-#include "graphics/DataTypes.h"
+#include "io/formats/Vertex.h"
+#include "io/formats/Mesh.h"
+#include "io/formats/Model.h"

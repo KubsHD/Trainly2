@@ -28,7 +28,7 @@ public:
 
 
 	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
-	
+	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position);
 
 private:
 
@@ -46,5 +46,7 @@ private:
 	ComPtr<ID3D11DepthStencilView> m_depthStencil;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 
+	STRB::Scope<DirectX::SpriteBatch> m_spriteBatch;
+	STRB::Scope<DirectX::SpriteFont> m_spriteFont;
 };
 

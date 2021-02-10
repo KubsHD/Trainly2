@@ -5,9 +5,18 @@
 #include <fstream>
 #include <iostream>
 
+
+
 namespace BinaryIO
 {
+
+
 	void WriteString(std::ofstream& bin, const std::string& value)
+	{
+		bin.write(value.data(), value.length() + 1);
+	}
+
+	void WriteString(std::fstream& bin, const std::string& value)
 	{
 		bin.write(value.data(), value.length() + 1);
 	}
@@ -29,6 +38,16 @@ namespace BinaryIO
 	}
 
 	std::string ReadString(std::ifstream& bin)
+	{
+		char data[256];
+		bin.read(data, 1);
+		char* chr = data;
+		while (*chr != '\0')
+			bin.read(++chr, 1);
+		return data;
+	}
+
+	std::string ReadString(std::fstream& bin)
 	{
 		char data[256];
 		bin.read(data, 1);

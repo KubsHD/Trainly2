@@ -152,6 +152,11 @@ void Graphics::Init(HWND app, SDL_Window* win)
 	ImGui_ImplSDL2_InitForD3D(win);
 	ImGui_ImplDX11_Init(m_device.Get(), m_devContext.Get());
 
+	// init sprite batch
+
+	m_spriteBatch = STRB::CreateScope<DirectX::SpriteBatch>(m_devContext.Get());
+	//m_spriteFont = STRB::CreateScope<DirectX::SpriteFont>();
+
 }
 
 void Graphics::Clear(float r, float g, float b)
@@ -164,10 +169,14 @@ void Graphics::Clear(float r, float g, float b)
 	ImGui_ImplSDL2_NewFrame(winTmp);
 	ImGui::NewFrame();
 
+	//m_spriteBatch->Begin();
+
 }
 
 void Graphics::Present()
 {
+
+	//m_spriteBatch->End();
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -332,4 +341,8 @@ void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, Dire
 
 		m_devContext->DrawIndexed(mod.GetMeshes()[i].GetIndexBuffer()->Count(), 0, 0);
 	}
+}
+
+void Graphics::DrawString(std::string text, DirectX::SimpleMath::Vector2 position)
+{
 }
