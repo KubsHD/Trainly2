@@ -198,8 +198,6 @@ PixelShader pixel_shader_ptr;
 
 STRB::Ref<Camera> cam;
 
-
-
 void Graphics::CreateTriangle()
 {
 	
@@ -218,7 +216,7 @@ void Graphics::CreateTriangle()
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
-	cam->Init(60.0f, aspectRatio, 0.5f, 100000.0f);
+	cam->Init(60.0f, aspectRatio, 10.0f, 100000.0f);
 	cam->SetPosition({ 0.0f, 30.0f, -30.0f });
 	cam->SetLookTargetPosition({ 0.0f, 0.0f, 0.0f });
 

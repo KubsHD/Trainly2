@@ -26,7 +26,7 @@ void Model::Create(ID3D11Device* device, std::string path)
 
 	this->Name = md.name;
 
-	std::cout << md.SIGNATURE << " " << md.VERSION << std::endl;
+	//std::cout << md.SIGNATURE << " " << md.VERSION << std::endl;
 
 	for (int i = 0; i < md.meshCount; i++)
 	{
@@ -55,7 +55,7 @@ void Model::Create(ID3D11Device* device, std::string path)
 	}
 
 
-	std::cout << md.name << std::endl;
+	//std::cout << md.name << std::endl;
 
 
 }

@@ -19,7 +19,7 @@ public:
 	static std::vector<T> ReadVector(std::ifstream& bin)
 	{
 		auto size = ReadInt(bin);
-		std::cout << size << std::endl;
+		//std::cout << size << std::endl;
 		std::vector<T> data;
 		data.resize(size);
 		bin.read((char*)&data[0], size * sizeof(T));
