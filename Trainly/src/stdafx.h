@@ -37,6 +37,7 @@ namespace STRB {
 #include <dxgi.h>        // DirectX driver interface
 #include <d3dcompiler.h> // shader compiler
 
+#include <filesystem>
 #include <exception>
 
 namespace DX

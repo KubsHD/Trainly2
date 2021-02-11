@@ -5,6 +5,10 @@
 #include "Model.h"
 #include "Camera.h"
 
+#include "shaders/PixelShader.h"
+#include "shaders/VertexShader.h"
+#include "material/Material.h"
+
 
 
 
@@ -29,6 +33,17 @@ public:
 
 	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
 	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position);
+
+
+	// Creating stuff
+
+	Texture			CreateTexture(const char* data, int width, int height);
+	Model			CreateModel(const char* data);
+
+	Material		CreateMaterial(const char* data);
+
+	PixelShader		CreatePixelShader(const char* data);
+	VertexShader	CreateVertexShader(const char* data);
 
 private:
 

@@ -5,6 +5,8 @@
 
 void Texture::Create(ID3D11Device* device, std::string path)
 {
+	assert(std::filesystem::exists(path));
+
 	DX::ThrowIfFailed(DirectX::CreateDDSTextureFromFile(
 		device,
 		StringConverter::StringToWide(path).c_str(),

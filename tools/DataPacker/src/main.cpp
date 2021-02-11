@@ -11,6 +11,14 @@
 #include <vector>
 #include <map>
 
+#include <cereal/types/map.hpp>
+#include <cereal/types/vector.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/complex.hpp>
+#include <cereal/archives/json.hpp>
+#include <cereal/specialize.hpp>
+#include <cereal/cereal.hpp>
+
 #include "utils/MD5.h"
 
 #include "compilers/BaseAssetCompiler.h"
@@ -18,13 +26,7 @@
 #include "compilers/ModelCompiler.h"
 #include "compilers/ShaderCompiler.h"
 
-struct CacheEntry
-{
-	std::string path;
-	std::string md5;
-};
-
-static std::vector<char> ReadAllBytes(char const* filename)
+static std::vector<char> ReadAllBytes(std::string filename)
 {
 	std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
 	std::ifstream::pos_type pos = ifs.tellg();
@@ -76,15 +78,39 @@ void copy_content(std::string srcDir, std::string dst)
 	}
 }
 
+struct hash_entry
+{
+	std::string path;
+	std::string md5;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(CEREAL_NVP(path), CEREAL_NVP(md5));
+	}
+};
+
 void build_content(std::string srcDir, std::string dst)
 {
 	std::map<std::string, BaseAssetCompiler*> compilers =
 	{
 		{ ".png", new TextureCompiler },
-		{ ".tif", new TextureCompiler }, 
+		{ ".tif", new TextureCompiler },
 		{ ".hlsl", new ShaderCompiler },
 		{ ".fbx", new ModelCompiler }
 	};
+
+	std::vector<hash_entry> hash_entries;
+
+	auto hashPath = dst + "\\cache.hash";
+
+	if (fs::exists(hashPath))
+	{
+		std::ifstream str(hashPath);
+		cereal::JSONInputArchive archive(str);
+		archive(hash_entries);
+	}
+
 
 	std::cout << "Writing files from source directory located in: " << srcDir << " to output directory: " << dst << std::endl;
 
@@ -118,17 +144,35 @@ void build_content(std::string srcDir, std::string dst)
 			std::cout << aboslutePathInTargetDirectory << std::endl;*/
 
 
-			//auto fileData = ReadAllBytes((const char*)path.c_str());
-			//auto fileMD5 = md5(std::string(fileData.begin(), fileData.end()));
+			auto fileData = ReadAllBytes(path.string());
+			auto fileMD5 = md5(std::string(fileData.begin(), fileData.end()));
 
-			/*BinaryIO::WriteString(cacheFile, path.string());
-			BinaryIO::WriteString(cacheFile, " ");
-			BinaryIO::WriteString(cacheFile, fileMD5);*/
+			bool fileChanged = true;
+			bool fileInHash = false;
 
-			
+			for (auto entry : hash_entries)
+			{
+				if (entry.path == abosluteFilePathInTargetDirectory.string())
+				{
+					if (entry.md5 == fileMD5)
+						fileChanged = false;
+					else
+						entry.md5 == fileMD5;
+
+					fileInHash = true;
+				}
+			}
+
+			if (!fileInHash)
+				hash_entries.push_back({ abosluteFilePathInTargetDirectory.string(), fileMD5 });
+
+			if (!fileChanged)
+				continue;
+
+
 			fs::create_directories(aboslutePathInTargetDirectory);
 
-			
+
 			if (compilers.find(fileExtension.string()) != compilers.end())
 			{
 				std::cout << "[INFO] " << "Processing: " << fileName.string() + fileExtension.string() << " with compiler: " << compilers[fileExtension.string()]->Name << std::endl;
@@ -141,6 +185,12 @@ void build_content(std::string srcDir, std::string dst)
 			}
 		}
 	}
+
+
+	std::ofstream str(hashPath);
+	cereal::JSONOutputArchive archive(str);
+	archive(hash_entries);
+
 }
 
 void decompile(std::string path)

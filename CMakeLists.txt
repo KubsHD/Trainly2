@@ -33,7 +33,8 @@ include_directories(deps/DirectXTK/Inc)
 add_subdirectory(deps/DirectXTK)
 
 
-
+#cereal
+include_directories(deps/cereal/include)
 
 set_target_properties(assimp PROPERTIES FOLDER "deps")
 set_target_properties(DirectXTK PROPERTIES FOLDER "deps")

@@ -185,6 +185,7 @@ void Graphics::Present()
 }
 
 Model mod;
+Model train;
 
 
 struct TransformConstantBuffer
@@ -213,6 +214,7 @@ void Graphics::CreateTriangle()
 	pixel_shader_ptr.Create(m_device.Get(), L"data/shader/pixel.scsh");
 
 	mod.Create(m_device.Get(), "data/model/chunk/city/mdl_city.smo");
+	train.Create(m_device.Get(), "data/model/train/mdl_train.smo");
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
@@ -307,6 +309,7 @@ void Graphics::DrawTraingle(float angle, Input& in)
 	m_devContext->PSSetShader(pixel_shader_ptr.Get(), 0, 0);
 
 	DrawModel(mod);
+	DrawModel(train);
 }
 
 void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
