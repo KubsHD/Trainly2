@@ -4,13 +4,18 @@
 #include "../Input.h"
 #include "Model.h"
 #include "Camera.h"
+#include "Font.h"
 
 #include "shaders/PixelShader.h"
 #include "shaders/VertexShader.h"
 #include "material/Material.h"
 
 
-
+struct Pipeline
+{
+	STRB::Ref<VertexShader> vShader;
+	STRB::Ref<PixelShader> pShader;
+};
 
 using namespace Microsoft::WRL;
 
@@ -25,25 +30,23 @@ public:
 	void Clear(float r, float g, float b);
 	void Present();
 
+
+
 	void CreateTriangle();
 	void DrawTraingle(float angle, Input& in);
+
+	void BindPipeline(Pipeline& pip);
 
 	// Drawing functions
 
 
 	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
-	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position);
+	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font);
 
 
-	// Creating stuff
+	ID3D11Device* GetDevice() { return m_device.Get(); }
 
-	Texture			CreateTexture(const char* data, int width, int height);
-	Model			CreateModel(const char* data);
-
-	Material		CreateMaterial(const char* data);
-
-	PixelShader		CreatePixelShader(const char* data);
-	VertexShader	CreateVertexShader(const char* data);
+	STRB::Ref<DirectX::SpriteBatch> GetSpriteBatch() { return m_spriteBatch; }
 
 private:
 
@@ -61,7 +64,6 @@ private:
 	ComPtr<ID3D11DepthStencilView> m_depthStencil;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 
-	STRB::Scope<DirectX::SpriteBatch> m_spriteBatch;
-	STRB::Scope<DirectX::SpriteFont> m_spriteFont;
+	STRB::Ref<DirectX::SpriteBatch> m_spriteBatch;
 };
 

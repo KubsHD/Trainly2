@@ -8,6 +8,7 @@
 #include "shaders/PixelShader.h"
 #include "shaders/VertexShader.h"
 #include "Texture.h"
+#include "Font.h"
 #include "Camera.h"
 #include "Mesh.h"
 #include "Model.h"
@@ -154,13 +155,30 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 	// init sprite batch
 
-	m_spriteBatch = STRB::CreateScope<DirectX::SpriteBatch>(m_devContext.Get());
+	m_spriteBatch = STRB::CreateRef<DirectX::SpriteBatch>(m_devContext.Get());
 	//m_spriteFont = STRB::CreateScope<DirectX::SpriteFont>();
+
+	// init viewport
+
+	GetClientRect(m_hwnd, &winRect);
+	D3D11_VIEWPORT viewport = {
+	  .TopLeftX = 0.0f,
+	  .TopLeftY = 0.0f,
+	  .Width = (FLOAT)(winRect.right - winRect.left),
+	  .Height = (FLOAT)(winRect.bottom - winRect.top),
+	  .MinDepth = 0.0f,
+	  .MaxDepth = 1.0f };
+
+
+	m_devContext->RSSetViewports(1, &viewport);
 
 }
 
 void Graphics::Clear(float r, float g, float b)
 {
+	//m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, m_samplerState.Get(), m_depthStencilState.Get());
+
+
 	float c[] = { r / 255.0f, g / 255.0f,b / 255.0f, 1.0f };
 	m_devContext.Get()->ClearRenderTargetView(m_renderViewTarget.Get(), c);
 	m_devContext.Get()->ClearDepthStencilView(m_depthStencil.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
@@ -169,7 +187,6 @@ void Graphics::Clear(float r, float g, float b)
 	ImGui_ImplSDL2_NewFrame(winTmp);
 	ImGui::NewFrame();
 
-	//m_spriteBatch->Begin();
 
 }
 
@@ -181,11 +198,9 @@ void Graphics::Present()
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-	HRESULT hr = m_swapChain->Present(1, 0);
+	DX::ThrowIfFailed(m_swapChain->Present(1, 0));
 }
 
-Model mod;
-Model train;
 
 
 struct TransformConstantBuffer
@@ -193,27 +208,10 @@ struct TransformConstantBuffer
 	Matrix transform;
 };
 
-VertexShader vertex_shader_ptr;
-PixelShader pixel_shader_ptr;
-
 STRB::Ref<Camera> cam;
 
 void Graphics::CreateTriangle()
 {
-	
-
-	std::vector<D3D11_INPUT_ELEMENT_DESC> inputElementDesc = {
-	  { "Position", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	  { "TexCoord", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	  { "Normal", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
-
-	vertex_shader_ptr.Create(m_device.Get(), inputElementDesc, L"data/shader/vertex.scsh");
-	pixel_shader_ptr.Create(m_device.Get(), L"data/shader/pixel.scsh");
-
-	mod.Create(m_device.Get(), "data/model/chunk/city/mdl_city.smo");
-	train.Create(m_device.Get(), "data/model/train/mdl_train.smo");
-
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
 	cam->Init(60.0f, aspectRatio, 10.0f, 100000.0f);
@@ -279,44 +277,31 @@ void Graphics::DrawTraingle(float angle, Input& in)
 
 	/*cam.SetPosition({ translation[0], translation[1], translation[2] });
 	cam.SetRotation({ rotation[0], rotation[1], rotation[2] });*/
+}
 
+void Graphics::BindPipeline(Pipeline& pip)
+{
+	m_devContext->VSSetShader(pip.vShader->Get(), 0, 0);
+	m_devContext->PSSetShader(pip.pShader->Get(), 0, 0);
+	m_devContext->IASetInputLayout(pip.vShader->GetLayout());
+}
 
-
-	RECT winRect;
-	GetClientRect(m_hwnd, &winRect);
-	D3D11_VIEWPORT viewport = {
-	  .TopLeftX = 0.0f,
-	  .TopLeftY = 0.0f,
-	  .Width = (FLOAT)(winRect.right - winRect.left),
-	  .Height = (FLOAT)(winRect.bottom - winRect.top),
-	  .MinDepth = 0.0f,
-	  .MaxDepth = 1.0f };
-
-
-	m_devContext->RSSetViewports(1, &viewport);
-
+void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
+{
 	m_devContext->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), m_depthStencil.Get());
 
 	m_devContext->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	m_devContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
-	m_devContext->IASetInputLayout(vertex_shader_ptr.GetLayout());
 
-	m_devContext->VSSetShader(vertex_shader_ptr.Get(), 0, 0);
-	m_devContext->PSSetShader(pixel_shader_ptr.Get(), 0, 0);
 
-	DrawModel(mod);
-	DrawModel(train);
-}
-
-void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
-{
 	ConstantBuffer<TransformConstantBuffer> cbd;
 
 	cbd.Create(m_device.Get());
 
-	Matrix world = Matrix::Identity.CreateFromQuaternion(rotation).CreateTranslation(position);
+	Matrix world = world.CreateTranslation(position);
+	world.CreateTranslation(position);
 	
 	TransformConstantBuffer cb = {
 		.transform = (world * m_activeCamera->GetView() * m_activeCamera->GetProjection()).Transpose()
@@ -330,7 +315,8 @@ void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, Dire
 	for(int i = 0; i < mod.GetMeshes().size(); i++)
 	{
 		if (mod.GetTextures().size() > 0)
-			m_devContext->PSSetShaderResources(0, 1, mod.GetTextures()[i].pGetShaderResource());
+			// TODO: support multiple materials/textures
+			m_devContext->PSSetShaderResources(0, 1, mod.GetTextures()[0].pGetShaderResource());
 
 		m_devContext->IASetIndexBuffer(mod.GetMeshes()[i].GetIndexBuffer()->Get(), DXGI_FORMAT_R32_UINT, 0);
 		m_devContext->IASetVertexBuffers(
@@ -344,6 +330,7 @@ void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, Dire
 	}
 }
 
-void Graphics::DrawString(std::string text, DirectX::SimpleMath::Vector2 position)
+void Graphics::DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font)
 {
+	font.GetFont()->DrawString(m_spriteBatch.get(), text.c_str(), position, DirectX::Colors::White, 0.0f, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
 }

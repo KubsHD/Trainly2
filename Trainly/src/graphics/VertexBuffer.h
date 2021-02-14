@@ -1,6 +1,5 @@
 #pragma once
 #include "buffer.h"
-#include "DataTypes.h"
 
 template<class T>
 class VertexBuffer : public Buffer

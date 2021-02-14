@@ -13,12 +13,12 @@ void ShaderCompiler::Process(std::string path, std::string targetPath)
 	ID3DBlob* errMsg = NULL;
 	DWORD dwShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG;
 
-	if (path.find("vert") != std::string::npos)
+	if (path.find("vertex") != std::string::npos)
 	{
 		D3DCompileFromFile(StringConverter::StringToWide(path).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "vs_4_0", dwShaderFlags, NULL, &VS_BUFFER, &errMsg);
 	}
 
-	if (path.find("pix") != std::string::npos)
+	if (path.find("pixel") != std::string::npos)
 	{
 		D3DCompileFromFile(StringConverter::StringToWide(path).c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, "main", "ps_4_0", dwShaderFlags, NULL, &VS_BUFFER, &errMsg);
 	}

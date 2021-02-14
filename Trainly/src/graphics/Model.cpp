@@ -24,6 +24,8 @@ void Model::Create(ID3D11Device* device, std::string path)
 	md.meshCount = BinaryIO::ReadShort(file);
 	md.name = BinaryIO::ReadString(file);
 
+	assert(md.SIGNATURE == "SMDL");
+
 	this->Name = md.name;
 
 	//std::cout << md.SIGNATURE << " " << md.VERSION << std::endl;

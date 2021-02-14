@@ -3,18 +3,28 @@
 #include "graphics/graphics.h"
 #include "timer.h"
 #include "Input.h"
+#include "io/ResourceManager.h"
+
+using namespace DirectX;
 
 SDL_Window* m_window;
 Graphics* graphics;
+
+STRB::Ref<Model> test;
+STRB::Ref<Font> debug;
 
 Input input;
 
 Timer t;
 
+ResourceManager rm;
+
 void update()
 {
 
 }
+
+Pipeline unlitPipeline;
 
 void init()
 {
@@ -43,7 +53,11 @@ void init()
 
     graphics->Init(wmInfo.info.win.window, m_window);
 
-    graphics->CreateTriangle();
+
+    rm.Init("data", *graphics);
+
+	graphics->CreateTriangle();
+
 
     //SDL_WarpMouseInWindow(m_window, 640, 360); 
     //SDL_SetWindowGrab(m_window, SDL_TRUE);
@@ -52,19 +66,50 @@ void init()
     //SDL_SetRelativeMouseMode(SDL_TRUE);
     //SDL_CaptureMouse(SDL_TRUE);
 
+    test = rm.LoadModel("model/chunk/farm/mdl_farm_chunk1");
+    debug = rm.LoadFont("font/comic");
+
+    unlitPipeline = {
+		.vShader = rm.LoadVertexShader("shader/unlit_vertex"),
+        .pShader = rm.LoadPixelShader("shader/unlit_pixel"),
+    };
+
 }
 
 float counter = 0;
+
+float updateFpsTimer = 0;
+
+float fps = 0;
+float deltaTime = 0;
+
 
 void frame()
 {
     graphics->Clear(37, 121, 231);
 
     counter += t.DeltaTime();
-
-    // graphics->DrawString(std::string(t.DeltaTime()), "comic"));
+    updateFpsTimer += t.DeltaTime();
 
     graphics->DrawTraingle(counter, input);
+
+    graphics->BindPipeline(unlitPipeline);
+
+    graphics->DrawModel(*test, {0.0f, 0.0f, 7200.0f});
+
+
+    if (updateFpsTimer >= 0.3)
+    {
+        fps = 1.0f / t.DeltaTime();
+        deltaTime = t.DeltaTime();
+        updateFpsTimer = 0;
+    }
+
+    graphics->GetSpriteBatch()->Begin();
+    graphics->DrawString("FPS: " + std::to_string(fps), { 10.0f, 0.0f }, *debug);
+	graphics->DrawString("Delta: " + std::to_string(deltaTime), { 10.0f, 35.0f }, *debug);
+	graphics->GetSpriteBatch()->End();
+
 
     graphics->Present();
 

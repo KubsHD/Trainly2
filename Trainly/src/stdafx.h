@@ -5,25 +5,6 @@
 
 #include <memory>
 
-namespace STRB {
-
-	// borrowed from hazel
-	template<typename T>
-	using Ref = std::shared_ptr<T>;
-	template<typename T, typename ... Args>
-	constexpr Ref<T> CreateRef(Args&& ... args)
-	{
-		return std::make_shared<T>(std::forward<Args>(args)...);
-	}
-
-	template<typename T>
-	using Scope = std::unique_ptr<T>;
-	template<typename T, typename ... Args>
-	constexpr Scope<T> CreateScope(Args&& ... args)
-	{
-		return std::make_unique<T>(std::forward<Args>(args)...);
-	}
-}
 
 #include <chrono>
 #include <fstream>
@@ -97,3 +78,33 @@ namespace DX
 #include "io/formats/Vertex.h"
 #include "io/formats/Mesh.h"
 #include "io/formats/Model.h"
+
+
+namespace STRB {
+
+	// borrowed from hazel
+	template<typename T>
+	using Ref = std::shared_ptr<T>;
+	template<typename T, typename ... Args>
+	constexpr Ref<T> CreateRef(Args&& ... args)
+	{
+		return std::make_shared<T>(std::forward<Args>(args)...);
+	}
+
+	template<typename T>
+	using Scope = std::unique_ptr<T>;
+	template<typename T, typename ... Args>
+	constexpr Scope<T> CreateScope(Args&& ... args)
+	{
+		return std::make_unique<T>(std::forward<Args>(args)...);
+	}
+
+//	void ThrowError(LPCSTR text)
+//	{
+//#if NDEBUG
+//		MessageBox(NULL, text, (LPCSTR)"B³¹d", MB_OKCANCEL);
+//#else
+//		MessageBox(NULL, text, (LPCSTR)"B³¹d", MB_OKCANCEL);
+//#endif
+//	}
+}
