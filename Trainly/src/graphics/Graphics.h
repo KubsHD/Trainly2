@@ -30,15 +30,10 @@ public:
 	void Clear(float r, float g, float b);
 	void Present();
 
-
-
-	void CreateTriangle();
-	void DrawTraingle(float angle, Input& in);
-
+	void SetActiveCamera(STRB::Ref<Camera> cam);
 	void BindPipeline(Pipeline& pip);
 
 	// Drawing functions
-
 
 	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
 	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font);

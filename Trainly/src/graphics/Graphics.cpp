@@ -176,7 +176,7 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 void Graphics::Clear(float r, float g, float b)
 {
-	//m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, m_samplerState.Get(), m_depthStencilState.Get());
+	m_spriteBatch->Begin(SpriteSortMode_Deferred, nullptr, m_samplerState.Get(), m_depthStencilState.Get());
 
 
 	float c[] = { r / 255.0f, g / 255.0f,b / 255.0f, 1.0f };
@@ -193,7 +193,7 @@ void Graphics::Clear(float r, float g, float b)
 void Graphics::Present()
 {
 
-	//m_spriteBatch->End();
+	m_spriteBatch->End();
 
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -208,76 +208,24 @@ struct TransformConstantBuffer
 	Matrix transform;
 };
 
-STRB::Ref<Camera> cam;
-
-void Graphics::CreateTriangle()
+void Graphics::SetActiveCamera(STRB::Ref<Camera> cam)
 {
-	float aspectRatio = 16.0 / 9.0f;
-	cam = STRB::CreateRef<Camera>();
-	cam->Init(60.0f, aspectRatio, 10.0f, 100000.0f);
-	cam->SetPosition({ 0.0f, 30.0f, -30.0f });
-	cam->SetLookTargetPosition({ 0.0f, 0.0f, 0.0f });
-
 	m_activeCamera = cam;
-
 }
 
-void Graphics::DrawTraingle(float angle, Input& in)
-{	
-	
-
-	float cameraSpeed = 10.0f;
-
-	if (in.IsKeyPressed(SDLK_LSHIFT))
-	{
-		cam->AppendPosition(cam->GetUpVector() * cameraSpeed);
-	}
-
-	if (in.IsKeyPressed(SDLK_LCTRL))
-	{
-		cam->AppendPosition(cam->GetDownVector() * cameraSpeed);
-	}
-
-	if (in.IsKeyPressed(SDLK_w))
-	{
-		cam->AppendPosition(cam->GetForwardVector() * cameraSpeed);
-	}
-
-	if (in.IsKeyPressed(SDLK_s))
-	{
-		cam->AppendPosition(cam->GetBackwardVector() * cameraSpeed);
-	}
-
-	if (in.IsKeyPressed(SDLK_a))
-	{
-		cam->AppendPosition(cam->GetLeftVector() * cameraSpeed);
-	}
-
-	if (in.IsKeyPressed(SDLK_d))
-	{
-		cam->AppendPosition(cam->GetRightVector() * cameraSpeed);
-	}
-
-	//cam.SetLookTargetPosition({ 0.0f, 10.0f, 0.0f });
-
-
-
-
-	if (in.IsMouseButtonPressed(SDL_BUTTON_RIGHT))
-		cam->AppendRotation({(in.GetDeltaMousePos().y * 0.005f), (in.GetDeltaMousePos().x * 0.005f), 0.0f});
-
-
-
-	//{
-	//	ImGui::Begin("Camera");
-	//	ImGui::DragFloat3("translation", translation, 0.1f, -99999.0f, 99999.0f);
-	//	ImGui::DragFloat3("rotation", rotation, 0.1f, -99999.0f, 99999.0f);
-	//	ImGui::End();
-	//}
-
-	/*cam.SetPosition({ translation[0], translation[1], translation[2] });
-	cam.SetRotation({ rotation[0], rotation[1], rotation[2] });*/
-}
+//void Graphics::DrawTraingle(float angle, Input& in)
+//{	
+//
+//	//{
+//	//	ImGui::Begin("Camera");
+//	//	ImGui::DragFloat3("translation", translation, 0.1f, -99999.0f, 99999.0f);
+//	//	ImGui::DragFloat3("rotation", rotation, 0.1f, -99999.0f, 99999.0f);
+//	//	ImGui::End();
+//	//}
+//
+//	/*cam.SetPosition({ translation[0], translation[1], translation[2] });
+//	cam.SetRotation({ rotation[0], rotation[1], rotation[2] });*/
+//}
 
 void Graphics::BindPipeline(Pipeline& pip)
 {

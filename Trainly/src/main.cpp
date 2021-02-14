@@ -12,15 +12,57 @@ Graphics* graphics;
 
 STRB::Ref<Model> test;
 STRB::Ref<Font> debug;
+STRB::Ref<Camera> cam;
 
-Input input;
+Input in;
 
 Timer t;
+
 
 ResourceManager rm;
 
 void update()
 {
+
+	float cameraSpeed = 10.0f;
+
+	if (in.IsKeyPressed(SDLK_LSHIFT))
+	{
+		cam->AppendPosition(cam->GetUpVector() * cameraSpeed);
+	}
+
+	if (in.IsKeyPressed(SDLK_LCTRL))
+	{
+		cam->AppendPosition(cam->GetDownVector() * cameraSpeed);
+	}
+
+	if (in.IsKeyPressed(SDLK_w))
+	{
+		cam->AppendPosition(cam->GetForwardVector() * cameraSpeed);
+	}
+
+	if (in.IsKeyPressed(SDLK_s))
+	{
+		cam->AppendPosition(cam->GetBackwardVector() * cameraSpeed);
+	}
+
+	if (in.IsKeyPressed(SDLK_a))
+	{
+		cam->AppendPosition(cam->GetLeftVector() * cameraSpeed);
+	}
+
+	if (in.IsKeyPressed(SDLK_d))
+	{
+		cam->AppendPosition(cam->GetRightVector() * cameraSpeed);
+	}
+
+	//cam.SetLookTargetPosition({ 0.0f, 10.0f, 0.0f });
+
+
+
+
+	if (in.IsMouseButtonPressed(SDL_BUTTON_RIGHT))
+		cam->AppendRotation({ (in.GetDeltaMousePos().y * 0.005f), (in.GetDeltaMousePos().x * 0.005f), 0.0f });
 
 }
 
@@ -50,21 +92,9 @@ void init()
 
     graphics = new Graphics();
 
-
     graphics->Init(wmInfo.info.win.window, m_window);
 
-
     rm.Init("data", *graphics);
-
-	graphics->CreateTriangle();
-
-
-    //SDL_WarpMouseInWindow(m_window, 640, 360); 
-    //SDL_SetWindowGrab(m_window, SDL_TRUE);
-
-
-    //SDL_SetRelativeMouseMode(SDL_TRUE);
-    //SDL_CaptureMouse(SDL_TRUE);
 
     test = rm.LoadModel("model/chunk/farm/mdl_farm_chunk1");
     debug = rm.LoadFont("font/comic");
@@ -74,6 +104,13 @@ void init()
         .pShader = rm.LoadPixelShader("shader/unlit_pixel"),
     };
 
+	float aspectRatio = 16.0 / 9.0f;
+	cam = STRB::CreateRef<Camera>();
+	cam->Init(60.0f, aspectRatio, 10.0f, 100000.0f);
+	cam->SetPosition({ 0.0f, 30.0f, -30.0f });
+	cam->SetLookTargetPosition({ 0.0f, 0.0f, 0.0f });
+
+    graphics->SetActiveCamera(cam);
 }
 
 float counter = 0;
@@ -91,8 +128,6 @@ void frame()
     counter += t.DeltaTime();
     updateFpsTimer += t.DeltaTime();
 
-    graphics->DrawTraingle(counter, input);
-
     graphics->BindPipeline(unlitPipeline);
 
     graphics->DrawModel(*test, {0.0f, 0.0f, 7200.0f});
@@ -105,11 +140,8 @@ void frame()
         updateFpsTimer = 0;
     }
 
-    graphics->GetSpriteBatch()->Begin();
     graphics->DrawString("FPS: " + std::to_string(fps), { 10.0f, 0.0f }, *debug);
 	graphics->DrawString("Delta: " + std::to_string(deltaTime), { 10.0f, 35.0f }, *debug);
-	graphics->GetSpriteBatch()->End();
-
 
     graphics->Present();
 
@@ -136,6 +168,8 @@ void run()
 
         frame();
 
+        update();
+
         SDL_Event e;
 
         while (SDL_PollEvent(&e))
@@ -146,16 +180,16 @@ void run()
                 running = false;
                 break;
             case SDL_KEYDOWN:
-                input.SetKeyState(e.key.keysym.sym, true);
+                in.SetKeyState(e.key.keysym.sym, true);
                 break;
             case SDL_KEYUP:
-                input.SetKeyState(e.key.keysym.sym, false);
+                in.SetKeyState(e.key.keysym.sym, false);
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                input.SetMouseButtonState(e.button.button, true);
+                in.SetMouseButtonState(e.button.button, true);
                 break;
             case SDL_MOUSEBUTTONUP:
-                input.SetMouseButtonState(e.button.button, false);
+                in.SetMouseButtonState(e.button.button, false);
                 break;
             default:
                 break;
@@ -164,10 +198,10 @@ void run()
 
         int x, y;
         SDL_GetRelativeMouseState(&x, &y);
-        input.SetDeltaMouseState({ (float)x , (float)y });
+        in.SetDeltaMouseState({ (float)x , (float)y });
 
         SDL_GetMouseState(&x, &y);
-        input.SetMousePosition({ (float)x , (float)y });
+        in.SetMousePosition({ (float)x , (float)y });
     }
 
 
