@@ -289,6 +289,7 @@ void Graphics::BindPipeline(Pipeline& pip)
 void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
 {
 	m_devContext->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), m_depthStencil.Get());
+	m_devContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 
 	m_devContext->IASetPrimitiveTopology(
 		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
