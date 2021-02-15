@@ -2,6 +2,8 @@
 #include "../graphics/Graphics.h"
 #include <src\graphics\Font.h>
 
+#include <map>
+
 class ResourceManager {
 public:
 	ResourceManager();

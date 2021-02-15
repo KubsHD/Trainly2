@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../stdafx.h"
-#include "../Input.h"
 #include "Model.h"
 #include "Camera.h"
 #include "Font.h"
@@ -27,6 +26,7 @@ public:
 	~Graphics() {};
 
 	void Init(HWND app, SDL_Window* win);
+
 	void Clear(float r, float g, float b);
 	void Present();
 
@@ -38,16 +38,12 @@ public:
 	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
 	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font);
 
-
 	ID3D11Device* GetDevice() { return m_device.Get(); }
-
-	STRB::Ref<DirectX::SpriteBatch> GetSpriteBatch() { return m_spriteBatch; }
-
 private:
 
 	STRB::Ref<Camera> m_activeCamera;
 
-	HWND m_hwnd;
+	HWND m_hwnd = NULL;
 
 	ComPtr<ID3D11Device> m_device;
 	ComPtr<ID3D11DeviceContext> m_devContext;

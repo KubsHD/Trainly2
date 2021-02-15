@@ -3,10 +3,10 @@
 #include "stdafx.h"
 #include <map>
 
-class Input
+class InputManager
 {
 public:
-	Input() { }
+	InputManager() { }
 
 	void ResetMouseDelta()
 	{
