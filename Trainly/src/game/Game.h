@@ -14,23 +14,29 @@ public:
 
 	void Init();
 
-	void Update(float deltaTime);
+	void Update(Timer& time);
 	void Draw(STRB::Ref<Graphics> renderer);
 
 	void Clean();
+
+	void Reload();
 
 	InputManager Input;
 	Timer Time;
 
 private:
 	SDL_Window* m_window;
+	
 	STRB::Ref<Graphics> m_graphics;
+
 	ResourceManager content;
 
 	std::vector<STRB::Ref<Model>> m_chunks;
+
 	STRB::Ref<Model> train;
 	STRB::Ref<Model> rail;
 
 	STRB::Ref<Font> debug;
+
 	STRB::Ref<Camera> cam;
 };

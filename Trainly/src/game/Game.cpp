@@ -1,6 +1,12 @@
 #include "Game.h"
 
+
 using namespace DirectX::SimpleMath;
+
+#pragma region GameVariables
+
+
+float trainSpeed = 200;
 
 Vector3 trainPos;
 Pipeline unlitPipeline;
@@ -12,8 +18,25 @@ float updateFpsTimer = 0;
 float fps = 0;
 float deltaTime = 0;
 
-std::vector<STRB::Ref<Model>> chunkQueue;
+STRB::Ref<Model> railModel;
 
+Vector3 railRootPos = { 0.0f, 0.0f, 600.0f };
+
+int currentRail = 0;
+
+struct RailObject
+{
+	STRB::Ref<Model> railModel;
+	Vector3 pos;
+	Quaternion rot;
+};
+
+std::vector<STRB::Ref<Model>> chunkQueue;
+std::vector<RailObject> railQueue;
+
+bool debugMode = false;
+
+#pragma endregion GameVariables
 
 void Game::Init()
 {
@@ -26,7 +49,7 @@ void Game::Init()
 
 	// create window
 
-	m_window = SDL_CreateWindow("Trainly 2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN);
+	m_window = SDL_CreateWindow("Trainly 2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
 	if (!m_window)
 	{
@@ -45,6 +68,7 @@ void Game::Init()
 
 	debug = content.LoadFont("font/comic");
 	train = content.LoadModel("model/train/mdl_train");
+	railModel = content.LoadModel("model/rail/Tory");
 
 	unlitPipeline = {
 		.vShader = content.LoadVertexShader("shader/unlit_vertex"),
@@ -53,7 +77,7 @@ void Game::Init()
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
-	cam->Init(60.0f, aspectRatio, 10.0f, 100000.0f);
+	cam->Init(30.0f, aspectRatio, 10.0f, 100000.0f);
 	cam->SetPosition({ 1000.0f, 1000.0f, 0.0f});
 	m_graphics->SetActiveCamera(cam);
 
@@ -64,61 +88,119 @@ void Game::Init()
 	for (auto& path : chunk_paths)
 		m_chunks.push_back(content.LoadModel(path));
 
+	Reload();
+
+}
+
+void Game::Reload()
+{
+	trainSpeed = 200;
+	currentRail = 0;
+	chunkQueue.clear();
+	railQueue.clear();
+	trainPos = Vector3::Zero;
+
 	for (int i = 0; i < 300; i++)
 	{
 		int randomNumber = rand() % 2;
 		chunkQueue.push_back(m_chunks[randomNumber]);
 	}
 
+	for (int i = 0; i < 100; i++)
+	{
+		railQueue.push_back(RailObject{
+			.railModel = railModel,
+.pos = { 0.0f, 100.0f, railRootPos.z + (360.0f * i) },
+.rot = { 0.0f, 0.0f, float(rand() * 90), 0.0f }
+			});
+	}
 }
 
 
-void Game::Update(float deltaTime)
+void Game::Update(Timer& time)
 {
-	counter += Time.DeltaTime();
-
-	trainPos.z += counter;
 
 	float cameraSpeed = 10.0f;
 
-	if (Input.IsKeyPressed(SDLK_LSHIFT))
+	if (Input.IsKeyPressed(SDLK_BACKQUOTE))
 	{
-		cam->AppendPosition(cam->GetUpVector() * cameraSpeed);
+		debugMode = !debugMode;
 	}
 
-	if (Input.IsKeyPressed(SDLK_LCTRL))
+	if (debugMode)
 	{
-		cam->AppendPosition(cam->GetDownVector() * cameraSpeed);
-	}
+		cam->SetFov(90.0f);
 
-	if (Input.IsKeyPressed(SDLK_w))
-	{
-		cam->AppendPosition(cam->GetForwardVector() * cameraSpeed);
-	}
+		if (Input.IsKeyDown(SDLK_LSHIFT))
+		{
+			cam->AppendPosition(cam->GetUpVector() * cameraSpeed);
+		}
 
-	if (Input.IsKeyPressed(SDLK_s))
-	{
-		cam->AppendPosition(cam->GetBackwardVector() * cameraSpeed);
-	}
+		if (Input.IsKeyDown(SDLK_LCTRL))
+		{
+			cam->AppendPosition(cam->GetDownVector() * cameraSpeed);
+		}
 
-	if (Input.IsKeyPressed(SDLK_a))
-	{
-		cam->AppendPosition(cam->GetLeftVector() * cameraSpeed);
-	}
+		if (Input.IsKeyDown(SDLK_w))
+		{
+			cam->AppendPosition(cam->GetForwardVector() * cameraSpeed);
+		}
 
-	if (Input.IsKeyPressed(SDLK_d))
+		if (Input.IsKeyDown(SDLK_s))
+		{
+			cam->AppendPosition(cam->GetBackwardVector() * cameraSpeed);
+		}
+
+		if (Input.IsKeyDown(SDLK_a))
+		{
+			cam->AppendPosition(cam->GetLeftVector() * cameraSpeed);
+		}
+
+		if (Input.IsKeyDown(SDLK_d))
+		{
+			cam->AppendPosition(cam->GetRightVector() * cameraSpeed);
+		}
+
+		if (Input.IsMouseButtonPressed(SDL_BUTTON_RIGHT))
+			cam->AppendRotation({ (Input.GetDeltaMousePos().y * 0.005f), (Input.GetDeltaMousePos().x * 0.005f), 0.0f });
+	}
+	else
 	{
-		cam->AppendPosition(cam->GetRightVector() * cameraSpeed);
+		trainPos.z += time.DeltaTime() * trainSpeed;
+
+		if (trainPos.z > railRootPos.z - 400.0f + (currentRail * 360.0f))
+			Reload();
+
+		cam->SetFov(35.0f);
+		cam->SetPosition({ 1000.0f, 1000.0f, trainPos.z + 1500.0f });
+		cam->SetRotation({ -100.0f, 180.0f, 0.0f });
+
+		if (Input.IsKeyPressed(SDLK_SPACE))
+		{
+			if (int(railQueue[currentRail].rot.z) % 180 == 0)
+			{
+				railQueue[currentRail].pos.y = 0;
+				currentRail++;
+				trainSpeed += 10;
+			}
+			else
+			{
+				Reload();
+			}
+
+		}
+
+		if (Input.IsKeyPressed(SDLK_r))
+		{
+			railQueue[currentRail].rot.z += 90;
+			std::cout << railQueue[currentRail].rot.z << std::endl;
+		}
 	}
 
 	//cam->SetPosition(Vector3(100.0f, 1000.0f, 0.0f) + trainPos);
 	//cam->SetLookTargetPosition(trainPos);
 
-	if (Input.IsMouseButtonPressed(SDL_BUTTON_RIGHT))
-		cam->AppendRotation({ (Input.GetDeltaMousePos().y * 0.005f), (Input.GetDeltaMousePos().x * 0.005f), 0.0f });
-
-	cam->SetPosition({ 1000.0f, 1000.0f, trainPos.z + 1000.0f });
-	cam->SetRotation({ -100.0f, 180.0f, 0.0f });
+	
 }
 
 
@@ -130,13 +212,16 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 	renderer->BindPipeline(unlitPipeline);
 
+	for (int i = 0; i < railQueue.size(); i++)
+	{
+		renderer->DrawModel(*railQueue[i].railModel, railQueue[i].pos, railQueue[i].rot);
+	}
+
 	for (int i = 0; i < chunkQueue.size(); i++)
 	{
 		renderer->DrawModel(*chunkQueue[i], { 0.0f, 0.0f, 7200.0f * i });
 	}
 
-
-	
 	renderer->DrawModel(*train, trainPos);
 
 	if (updateFpsTimer >= 0.3)
@@ -146,11 +231,36 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 		updateFpsTimer = 0;
 	}
 
-	renderer->DrawString("FPS: " + std::to_string(fps), { 10.0f, 0.0f }, *debug);
-	renderer->DrawString("Delta: " + std::to_string(deltaTime), { 10.0f, 35.0f }, *debug);
+	if (debugMode)
+	{
+		renderer->DrawString("FPS: " + std::to_string(fps), { 10.0f, 0.0f }, *debug);
+		renderer->DrawString("Delta: " + std::to_string(deltaTime), { 10.0f, 35.0f }, *debug);
+
+		// debug ui
+
+
+		{
+			ImGui::SetNextWindowSize({ 500, 50 });
+			ImGui::Begin("Train Debug");
+			ImGui::Text("Train position: X: %f, Y: %f, Z: %f", trainPos.x, trainPos.y, trainPos.z);
+			ImGui::End();
+		}
+
+		{
+			ImGui::Begin("Rail Debug");
+			ImGui::Text("Current rail: %i", currentRail);
+			if (ImGui::Button("Reset"))
+				Reload();
+
+			ImGui::End();
+		}
+	}
+	else
+	{
+		renderer->DrawString("Score: " + std::to_string(currentRail), { 550, 80.0f }, *debug);
+	}
 
 	renderer->Present();
-
 }
 
 void Game::Clean()
@@ -171,9 +281,6 @@ void Game::Run()
 
 		Time.Tick();
 
-		Draw(m_graphics);
-
-		Update(Time.DeltaTime());
 
 		SDL_Event e;
 
@@ -196,6 +303,11 @@ void Game::Run()
 			case SDL_MOUSEBUTTONUP:
 				Input.SetMouseButtonState(e.button.button, false);
 				break;
+			case SDL_WINDOWEVENT:
+				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+					m_graphics->Resize(e.window.data1, e.window.data2);
+				}
+				break;
 			default:
 				break;
 			}
@@ -207,6 +319,12 @@ void Game::Run()
 
 		SDL_GetMouseState(&x, &y);
 		Input.SetMousePosition({ (float)x , (float)y });
+	
+		Draw(m_graphics);
+
+		Update(Time);
+
+		Input.Update();
 	}
 
 

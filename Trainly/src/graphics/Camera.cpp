@@ -13,7 +13,13 @@ Camera::Camera()
 void Camera::Init(float fov, float aspectRatio, float nearZ, float farZ)
 {
 	float fovRadians = (fov / 360.0f) * DirectX::XM_2PI;
-	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fovRadians, aspectRatio, nearZ, farZ);
+
+	this->fov = fovRadians;
+	this->aspectRatio = aspectRatio;
+	this->nearZ = nearZ;
+	this->farZ = farZ;
+
+	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fovRadians, this->aspectRatio, nearZ, farZ);
 	this->UpdateViewMatrix();
 }
 
@@ -36,5 +42,21 @@ void Camera::UpdateViewMatrix()
 	this->m_vecRight = XMVector3TransformCoord(this->DEFAULT_RIGHT_VECTOR, vecRotMat);
 	this->m_vecUp = XMVector3TransformCoord(this->DEFAULT_UP_VECTOR, vecRotMat);
 	this->m_vecDown = XMVector3TransformCoord(this->DEFAULT_DOWN_VECTOR, vecRotMat);
+}
+
+void Camera::Resize(float w, float h)
+{
+	std::cout << "Resizing to: " << w << " x " << h << std::endl;
+	aspectRatio = w / h * 1.0f;
+
+	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(this->fov, aspectRatio, nearZ, farZ);
+	this->UpdateViewMatrix();
+}
+
+void Camera::SetFov(float angle)
+{
+	this->fov = (angle / 360.0f) * DirectX::XM_2PI;
+	m_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(this->fov, aspectRatio, nearZ, farZ);
+	this->UpdateViewMatrix();
 }
 

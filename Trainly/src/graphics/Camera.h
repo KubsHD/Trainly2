@@ -86,6 +86,10 @@ private:
 
 	void UpdateViewMatrix();
 
+	float fov;
+	float nearZ;
+	float farZ;
+
 	DirectX::SimpleMath::Vector3 m_position;
 	DirectX::SimpleMath::Vector3 m_rotation;
 	DirectX::SimpleMath::Matrix m_viewMatrix;
@@ -107,5 +111,10 @@ private:
 	DirectX::SimpleMath::Vector3 m_vecUp;
 	DirectX::SimpleMath::Vector3 m_vecDown;
 
+public:
+	void Resize(float w, float h);
+	void SetFov(float angle);
+private:
+	float aspectRatio;
 };
 

@@ -172,6 +172,8 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 	m_devContext->RSSetViewports(1, &viewport);
 
+	m_transformBuffer.Create(m_device.Get());
+
 }
 
 void Graphics::Clear(float r, float g, float b)
@@ -203,11 +205,6 @@ void Graphics::Present()
 
 
 
-struct TransformConstantBuffer
-{
-	Matrix transform;
-};
-
 void Graphics::SetActiveCamera(STRB::Ref<Camera> cam)
 {
 	m_activeCamera = cam;
@@ -234,6 +231,47 @@ void Graphics::BindPipeline(Pipeline& pip)
 	m_devContext->IASetInputLayout(pip.vShader->GetLayout());
 }
 
+void Graphics::Resize(int w, int h)
+{
+	/*
+	m_devContext->OMSetRenderTargets(0, 0, 0);
+	m_renderViewTarget->Release();
+	
+	DX::ThrowIfFailed(m_swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
+
+	ID3D11Resource* backBuffer;
+	m_swapChain.Get()->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer));
+	m_device.Get()->CreateRenderTargetView(backBuffer, NULL, m_renderViewTarget.GetAddressOf());
+	
+	
+	backBuffer->Release();
+
+	m_devContext->OMSetRenderTargets(1, &m_renderViewTarget, NULL);
+	// Set up the viewport.
+	D3D11_VIEWPORT vp;
+	vp.Width = w;
+	vp.Height = h;
+	vp.MinDepth = 0.0f;
+	vp.MaxDepth = 1.0f;
+	vp.TopLeftX = 0;
+	vp.TopLeftY = 0;
+	m_devContext->RSSetViewports(1, &vp);
+	*/
+	m_activeCamera->Resize(w, h);
+}
+
+float deg2rad(float angle)
+{
+	return XMConvertToRadians(angle);
+}
+
+IndexBuffer Graphics::CreateIndexBuffer(uint32_t* indices, UINT indiceCount)
+{
+	auto ib = IndexBuffer();
+	ib.Create(m_device.Get(), indices, indiceCount);
+	return ib;
+}
+
 void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
 {
 	m_devContext->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), m_depthStencil.Get());
@@ -245,21 +283,17 @@ void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, Dire
 	m_devContext->PSSetSamplers(0, 1, m_samplerState.GetAddressOf());
 
 
-	ConstantBuffer<TransformConstantBuffer> cbd;
+	Matrix model;
+	model = model.CreateFromYawPitchRoll(deg2rad(rotation.z), deg2rad(rotation.y), deg2rad(rotation.x)) * model.CreateTranslation(position);
 
-	cbd.Create(m_device.Get());
-
-	Matrix world = world.CreateTranslation(position);
-	world.CreateTranslation(position);
-	
-	TransformConstantBuffer cb = {
-		.transform = (world * m_activeCamera->GetView() * m_activeCamera->GetProjection()).Transpose()
+	TransformConstantBuffer transform = {
+		.transform = (model * m_activeCamera->GetView() * m_activeCamera->GetProjection()).Transpose()
 	};
 
 
-	cbd.UpdateBuffer(m_devContext.Get(), &cb);
+	m_transformBuffer.UpdateBuffer(m_devContext.Get(), &transform);
 
-	m_devContext->VSSetConstantBuffers(0, 1, cbd.GetAddressOf());
+	m_devContext->VSSetConstantBuffers(0, 1, m_transformBuffer.GetAddressOf());
 
 	for(int i = 0; i < mod.GetMeshes().size(); i++)
 	{
@@ -282,4 +316,13 @@ void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, Dire
 void Graphics::DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font)
 {
 	font.GetFont()->DrawString(m_spriteBatch.get(), text.c_str(), position, DirectX::Colors::White, 0.0f, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f });
+}
+
+void Graphics::DrawLine(Vector3 beginPos, Vector3 endPos)
+{
+	m_devContext->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), m_depthStencil.Get());
+	m_devContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
+
+	m_devContext->IASetPrimitiveTopology(
+		D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

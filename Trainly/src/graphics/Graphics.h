@@ -5,6 +5,11 @@
 #include "Camera.h"
 #include "Font.h"
 
+#include "ConstantBuffer.h"
+
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
+
 #include "shaders/PixelShader.h"
 #include "shaders/VertexShader.h"
 #include "material/Material.h"
@@ -14,6 +19,11 @@ struct Pipeline
 {
 	STRB::Ref<VertexShader> vShader;
 	STRB::Ref<PixelShader> pShader;
+};
+
+struct TransformConstantBuffer
+{
+	DirectX::SimpleMath::Matrix transform;
 };
 
 using namespace Microsoft::WRL;
@@ -33,10 +43,20 @@ public:
 	void SetActiveCamera(STRB::Ref<Camera> cam);
 	void BindPipeline(Pipeline& pip);
 
+	void Resize(int w, int h);
+
+	// Creating functions
+
+	template<class T>
+	VertexBuffer<T> CreateVertexBuffer(T* data, UINT vertexCount);
+	IndexBuffer CreateIndexBuffer(uint32_t* indices, UINT indiceCount);
+
 	// Drawing functions
 
-	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = { 0,0,0,0 });
+	void DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position = { 0,0,0 }, DirectX::SimpleMath::Quaternion rotation = DirectX::SimpleMath::Quaternion::Identity);
 	void DrawString(std::string text, DirectX::SimpleMath::Vector2 position, Font& font);
+
+	void DrawLine(DirectX::SimpleMath::Vector3 beginPos, DirectX::SimpleMath::Vector3 endPos);
 
 	ID3D11Device* GetDevice() { return m_device.Get(); }
 private:
@@ -55,6 +75,20 @@ private:
 	ComPtr<ID3D11DepthStencilView> m_depthStencil;
 	ComPtr<ID3D11DepthStencilState> m_depthStencilState;
 
+	// buffers
+
+	ConstantBuffer<TransformConstantBuffer> m_transformBuffer;
+
+
 	STRB::Ref<DirectX::SpriteBatch> m_spriteBatch;
 };
+
+template<class T>
+VertexBuffer<T>
+Graphics::CreateVertexBuffer(T* data, UINT vertexCount)
+{
+	auto vb = VertexBuffer();
+	vb.Create(m_device.Get(), data, vertexCount);
+	return vb;
+}
 

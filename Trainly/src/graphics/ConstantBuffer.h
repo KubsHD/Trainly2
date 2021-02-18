@@ -2,6 +2,8 @@
 
 #include "buffer.h"
 
+
+
 template<class T>
 class ConstantBuffer : public Buffer
 {
