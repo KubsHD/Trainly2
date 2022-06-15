@@ -15,7 +15,6 @@ include_directories(deps/assimp/include)
 add_subdirectory(deps/assimp)
 
 set(CMAKE_CXX_STANDARD 20)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 #sdl
@@ -36,9 +35,19 @@ add_subdirectory(deps/DirectXTK)
 #cereal
 include_directories(deps/cereal/include)
 
+#lua
+
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(deps/lua)
+
+#sol
+add_subdirectory(deps/sol2)
+
 set_target_properties(assimp PROPERTIES FOLDER "deps")
 set_target_properties(DirectXTK PROPERTIES FOLDER "deps")
 set_target_properties(DirectXTex PROPERTIES FOLDER "deps")
+
+
 
 # tools
 

@@ -84,10 +84,9 @@ private:
 };
 
 template<class T>
-VertexBuffer<T>
-Graphics::CreateVertexBuffer(T* data, UINT vertexCount)
+VertexBuffer<T> Graphics::CreateVertexBuffer(T* data, UINT vertexCount)
 {
-	auto vb = VertexBuffer();
+	auto vb = VertexBuffer<T>();
 	vb.Create(m_device.Get(), data, vertexCount);
 	return vb;
 }

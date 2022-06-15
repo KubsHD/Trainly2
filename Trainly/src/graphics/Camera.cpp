@@ -34,7 +34,7 @@ void Camera::UpdateViewMatrix()
 
 	m_viewMatrix = DirectX::XMMatrixLookAtLH(m_position, camTarget, upDir);
 
-	Matrix vecRotMat = DirectX::XMMatrixRotationRollPitchYaw(0.0f, m_rotation.y, 0.0f);
+	Matrix vecRotMat = DirectX::XMMatrixRotationRollPitchYaw(m_rotation.x, m_rotation.y, m_rotation.z);
 
 	this->m_vecForward = XMVector3TransformCoord(this->DEFAULT_FORWARD_VECTOR, vecRotMat);
 	this->m_vecBackward = XMVector3TransformCoord(this->DEFAULT_BACKWARD_VECTOR, vecRotMat);

@@ -31,8 +31,12 @@ struct RailObject
 	Quaternion rot;
 };
 
+bool godMode = false;
+
 std::vector<STRB::Ref<Model>> chunkQueue;
 std::vector<RailObject> railQueue;
+
+Pipeline litPipeline;
 
 bool debugMode = false;
 
@@ -75,6 +79,11 @@ void Game::Init()
 		.pShader = content.LoadPixelShader("shader/unlit_pixel"),
 	};
 
+	litPipeline = {
+		.vShader = content.LoadVertexShader("shader/lit_vertex"),
+		.pShader = content.LoadPixelShader("shader/lit_pixel"),
+	};
+
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
 	cam->Init(30.0f, aspectRatio, 10.0f, 100000.0f);
@@ -110,9 +119,9 @@ void Game::Reload()
 	{
 		railQueue.push_back(RailObject{
 			.railModel = railModel,
-.pos = { 0.0f, 100.0f, railRootPos.z + (360.0f * i) },
-.rot = { 0.0f, 0.0f, float(rand() * 90), 0.0f }
-			});
+			.pos = { 0.0f, 100.0f, railRootPos.z + (360.0f * i) },
+			.rot = { 0.0f, 0.0f, float(rand() * 90), 0.0f }
+		});
 	}
 }
 
@@ -131,12 +140,12 @@ void Game::Update(Timer& time)
 	{
 		cam->SetFov(90.0f);
 
-		if (Input.IsKeyDown(SDLK_LSHIFT))
+		if (Input.IsKeyDown(SDLK_e))
 		{
 			cam->AppendPosition(cam->GetUpVector() * cameraSpeed);
 		}
 
-		if (Input.IsKeyDown(SDLK_LCTRL))
+		if (Input.IsKeyDown(SDLK_q))
 		{
 			cam->AppendPosition(cam->GetDownVector() * cameraSpeed);
 		}
@@ -168,7 +177,7 @@ void Game::Update(Timer& time)
 	{
 		trainPos.z += time.DeltaTime() * trainSpeed;
 
-		if (trainPos.z > railRootPos.z - 400.0f + (currentRail * 360.0f))
+		if (trainPos.z > railRootPos.z - 400.0f + (currentRail * 360.0f) && !godMode)
 			Reload();
 
 		cam->SetFov(35.0f);
@@ -183,7 +192,7 @@ void Game::Update(Timer& time)
 				currentRail++;
 				trainSpeed += 10;
 			}
-			else
+			else if (!godMode)
 			{
 				Reload();
 			}
@@ -208,9 +217,10 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 {
 	renderer->Clear(37, 121, 231);
 
+	
 	updateFpsTimer += Time.DeltaTime();
 
-	renderer->BindPipeline(unlitPipeline);
+	renderer->BindPipeline(litPipeline);
 
 	for (int i = 0; i < railQueue.size(); i++)
 	{
@@ -238,7 +248,6 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 		// debug ui
 
-
 		{
 			ImGui::SetNextWindowSize({ 500, 50 });
 			ImGui::Begin("Train Debug");
@@ -248,6 +257,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 		{
 			ImGui::Begin("Rail Debug");
+			ImGui::Checkbox("god mode", &godMode);
 			ImGui::Text("Current rail: %i", currentRail);
 			if (ImGui::Button("Reset"))
 				Reload();
@@ -259,7 +269,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 	{
 		renderer->DrawString("Score: " + std::to_string(currentRail), { 550, 80.0f }, *debug);
 	}
-
+	
 	renderer->Present();
 }
 

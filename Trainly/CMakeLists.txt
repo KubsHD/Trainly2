@@ -20,7 +20,7 @@ add_executable(
 )
 
 target_precompile_headers(Game PRIVATE src/stdafx.h)
-target_link_libraries(Game DirectXTex DirectXTK SDL2-static SDL2main)
+target_link_libraries(Game DirectXTex DirectXTK SDL2-static SDL2main lua::lib lua::header sol2)
 
 
 if (WIN32)
