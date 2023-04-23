@@ -97,9 +97,12 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 
 
-	ID3D11Resource* backBuffer;
-	m_swapChain.Get()->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer));
-	m_device.Get()->CreateRenderTargetView(backBuffer, NULL, m_renderViewTarget.GetAddressOf());
+	ID3D11Texture2D* backBuffer;
+	DX::ThrowIfFailed(m_swapChain.Get()->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+	DX::ThrowIfFailed(m_device.Get()->CreateRenderTargetView(backBuffer, NULL, m_renderViewTarget.ReleaseAndGetAddressOf()));
+	
+	backBuffer->Release();
+
 	m_devContext.Get()->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), NULL);
 
 	//init sampler state
@@ -233,30 +236,53 @@ void Graphics::BindPipeline(Pipeline& pip)
 
 void Graphics::Resize(int w, int h)
 {
-	/*
 	m_devContext->OMSetRenderTargets(0, 0, 0);
 	m_renderViewTarget->Release();
 	
 	DX::ThrowIfFailed(m_swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, 0));
 
-	ID3D11Resource* backBuffer;
-	m_swapChain.Get()->GetBuffer(0, __uuidof(ID3D11Resource), reinterpret_cast<void**>(&backBuffer));
-	m_device.Get()->CreateRenderTargetView(backBuffer, NULL, m_renderViewTarget.GetAddressOf());
-	
+	ID3D11Texture2D* backBuffer;
+	DX::ThrowIfFailed(m_swapChain.Get()->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+	DX::ThrowIfFailed(m_device.Get()->CreateRenderTargetView(backBuffer, NULL, m_renderViewTarget.GetAddressOf()));
 	
 	backBuffer->Release();
 
-	m_devContext->OMSetRenderTargets(1, &m_renderViewTarget, NULL);
+	// resize depth stencil
+
+	ID3D11Texture2D* pDepthStencil = NULL;
+	D3D11_TEXTURE2D_DESC descDepth;
+
+	descDepth.Width = w;
+	descDepth.Height = h;
+	descDepth.MipLevels = 1;
+	descDepth.ArraySize = 1;
+	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
+	descDepth.SampleDesc.Count = 1;
+	descDepth.SampleDesc.Quality = 0;
+	descDepth.Usage = D3D11_USAGE_DEFAULT;
+	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	descDepth.CPUAccessFlags = 0;
+	descDepth.MiscFlags = 0;
+
+	DX::ThrowIfFailed(m_device->CreateTexture2D(&descDepth, NULL, m_depthBuffer.GetAddressOf()));
+	DX::ThrowIfFailed(m_device->CreateDepthStencilView(m_depthBuffer.Get(), NULL, m_depthStencil.GetAddressOf()));
+
+
+	
+	m_devContext->OMSetRenderTargets(1, m_renderViewTarget.GetAddressOf(), NULL);
+
 	// Set up the viewport.
-	D3D11_VIEWPORT vp;
-	vp.Width = w;
-	vp.Height = h;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	m_devContext->RSSetViewports(1, &vp);
-	*/
+	RECT winRect;
+	GetClientRect(m_hwnd, &winRect);
+	D3D11_VIEWPORT viewport = {
+	  .TopLeftX = 0.0f,
+	  .TopLeftY = 0.0f,
+	  .Width = (FLOAT)(winRect.right - winRect.left),
+	  .Height = (FLOAT)(winRect.bottom - winRect.top),
+	  .MinDepth = 0.0f,
+	  .MaxDepth = 1.0f };
+	m_devContext->RSSetViewports(1, &viewport);
+	
 	m_activeCamera->Resize(w, h);
 }
 

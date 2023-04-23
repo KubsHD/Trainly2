@@ -12,8 +12,6 @@ A C++ port/demake of a canceled game I worked on.
 
 #### Automatic build
 2. Open cloned directory with Visual Studio
-<br />
-
 #### Manual build
 
 2. Create build directory<br />

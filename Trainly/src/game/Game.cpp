@@ -86,7 +86,7 @@ void Game::Init()
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
-	cam->Init(30.0f, aspectRatio, 10.0f, 100000.0f);
+	cam->Init(30.0f, aspectRatio, 1.0f, 10000.0f);
 	cam->SetPosition({ 1000.0f, 1000.0f, 0.0f});
 	m_graphics->SetActiveCamera(cam);
 
@@ -220,7 +220,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 	
 	updateFpsTimer += Time.DeltaTime();
 
-	renderer->BindPipeline(litPipeline);
+	renderer->BindPipeline(unlitPipeline);
 
 	for (int i = 0; i < railQueue.size(); i++)
 	{
@@ -314,7 +314,7 @@ void Game::Run()
 				Input.SetMouseButtonState(e.button.button, false);
 				break;
 			case SDL_WINDOWEVENT:
-				if (e.window.event == SDL_WINDOWEVENT_RESIZED) {
+				if (e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 					m_graphics->Resize(e.window.data1, e.window.data2);
 				}
 				break;

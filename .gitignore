@@ -10,7 +10,7 @@ Release/
 *.pdb
 *.obj
 .DS_Store
-Trainly/data
+Trainly/data/model
 tools/fontbm/
 art/
 .idea/
