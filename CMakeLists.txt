@@ -1,10 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(StorbeedEngine)
+project(Trainly)
 
+include(FetchContent)
+
+set(BUILD_SHARED_LIBS FALSE)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SUPPRESS_REGENERATION true)
 #set(CMAKE_UNITY_BUILD ON)
+
 
 if (WIN32)
     add_compile_definitions(WIN)
@@ -15,13 +19,16 @@ include_directories(deps/assimp/include)
 add_subdirectory(deps/assimp)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+#set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 #sdl
-include_directories(deps/SDL2/include)
-add_definitions(-DSDL_STATIC)
-add_subdirectory(deps/SDL2)
-remove_definitions(-DUSING_GENERATED_CONFIG_H)
+FetchContent_Declare(
+    SDL
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL
+    GIT_TAG release-2.26.5
+)
+
+FetchContent_MakeAvailable(SDL)
 
 #directxtex 
 include_directories(deps/DirectXTex/DirectXTex)
@@ -35,13 +42,6 @@ add_subdirectory(deps/DirectXTK)
 #cereal
 include_directories(deps/cereal/include)
 
-#lua
-
-set(BUILD_SHARED_LIBS OFF)
-add_subdirectory(deps/lua)
-
-#sol
-add_subdirectory(deps/sol2)
 
 set_target_properties(assimp PROPERTIES FOLDER "deps")
 set_target_properties(DirectXTK PROPERTIES FOLDER "deps")

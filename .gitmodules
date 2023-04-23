@@ -1,0 +1,16 @@
+[submodule "deps/assimp"]
+	path = deps/assimp
+	url = https://github.com/assimp/assimp
+[submodule "deps/cereal"]
+	path = deps/cereal
+	url = https://github.com/USCiLab/cereal
+[submodule "deps/DirectXTex"]
+	path = deps/DirectXTex
+	url = https://github.com/microsoft/DirectXTex
+[submodule "deps/DirectXTK"]
+	path = deps/DirectXTK
+	url = https://github.com/microsoft/DirectXTK
+[submodule "deps/SDL"]
+	path = deps/SDL
+	url = https://github.com/libsdl-org/SDL
+	branch = SDL2

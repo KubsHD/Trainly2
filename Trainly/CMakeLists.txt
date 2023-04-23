@@ -20,13 +20,8 @@ add_executable(
 )
 
 target_precompile_headers(Game PRIVATE src/stdafx.h)
-target_link_libraries(Game DirectXTex DirectXTK SDL2-static SDL2main lua::lib lua::header sol2)
+target_link_libraries(Game DirectXTex DirectXTK SDL2-static SDL2main)
 
-add_custom_command(
-    TARGET Game POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:Game> $<TARGET_FILE_DIR:Game>
-    COMMAND_EXPAND_LISTS
-)
 
 
 if (WIN32)

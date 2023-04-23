@@ -12,7 +12,6 @@ Release/
 .DS_Store
 Trainly/data
 tools/fontbm/
-deps/
 art/
 .idea/
 cmake-build-*
