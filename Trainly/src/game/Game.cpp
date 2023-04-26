@@ -6,7 +6,7 @@ using namespace DirectX::SimpleMath;
 #pragma region GameVariables
 
 
-float trainSpeed = 200;
+float trainSpeed = 2;
 
 Vector3 trainPos;
 Pipeline unlitPipeline;
@@ -20,7 +20,7 @@ float deltaTime = 0;
 
 STRB::Ref<Model> railModel;
 
-Vector3 railRootPos = { 0.0f, 0.0f, 600.0f };
+Vector3 railRootPos = { 0.0f, 0.0f, 7.0f };
 
 int currentRail = 0;
 
@@ -86,7 +86,7 @@ void Game::Init()
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
-	cam->Init(30.0f, aspectRatio, 1.0f, 10000.0f);
+	cam->Init(30.0f, aspectRatio, 1.0f, 100.0f);
 	cam->SetPosition({ 1000.0f, 1000.0f, 0.0f});
 	m_graphics->SetActiveCamera(cam);
 
@@ -103,7 +103,7 @@ void Game::Init()
 
 void Game::Reload()
 {
-	trainSpeed = 200;
+	trainSpeed = 2;
 	currentRail = 0;
 	chunkQueue.clear();
 	railQueue.clear();
@@ -119,7 +119,7 @@ void Game::Reload()
 	{
 		railQueue.push_back(RailObject{
 			.railModel = railModel,
-			.pos = { 0.0f, 100.0f, railRootPos.z + (360.0f * i) },
+			.pos = { 0.0f, 1.0f, railRootPos.z + (3.6f * i) },
 			.rot = { 0.0f, 0.0f, float(rand() * 90), 0.0f }
 		});
 	}
@@ -129,7 +129,7 @@ void Game::Reload()
 void Game::Update(Timer& time)
 {
 
-	float cameraSpeed = 10.0f;
+	float cameraSpeed = 1.0f;
 
 	if (Input.IsKeyPressed(SDLK_BACKQUOTE))
 	{
@@ -177,11 +177,11 @@ void Game::Update(Timer& time)
 	{
 		trainPos.z += time.DeltaTime() * trainSpeed;
 
-		if (trainPos.z > railRootPos.z - 400.0f + (currentRail * 360.0f) && !godMode)
+		if (trainPos.z > railRootPos.z - 4.0f + (currentRail * 3.6f) && !godMode)
 			Reload();
 
-		cam->SetFov(35.0f);
-		cam->SetPosition({ 1000.0f, 1000.0f, trainPos.z + 1500.0f });
+		cam->SetFov(30.0f);
+		cam->SetPosition({ 10.0f, 10.0f, trainPos.z + 15.0f });
 		cam->SetRotation({ -100.0f, 180.0f, 0.0f });
 
 		if (Input.IsKeyPressed(SDLK_SPACE))
@@ -190,7 +190,7 @@ void Game::Update(Timer& time)
 			{
 				railQueue[currentRail].pos.y = 0;
 				currentRail++;
-				trainSpeed += 10;
+				trainSpeed += 0.1f;
 			}
 			else if (!godMode)
 			{
@@ -229,7 +229,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 	for (int i = 0; i < chunkQueue.size(); i++)
 	{
-		renderer->DrawModel(*chunkQueue[i], { 0.0f, 0.0f, 7200.0f * i });
+		renderer->DrawModel(*chunkQueue[i], { 0.0f, 0.0f, 72.0f * i });
 	}
 
 	renderer->DrawModel(*train, trainPos);

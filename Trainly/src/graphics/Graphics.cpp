@@ -30,7 +30,7 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 	HRESULT hr;
 
-	DXGI_ADAPTER_DESC adapterDesc;
+	DXGI_ADAPTER_DESC adapterDesc = {};
 
 	D3D_FEATURE_LEVEL lvl;
 
@@ -53,7 +53,7 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 	// swapchain
 
-	DXGI_SWAP_CHAIN_DESC scd;
+	DXGI_SWAP_CHAIN_DESC scd = {};
 	scd.BufferDesc.Width = 0;												// width of the back buffer
 	scd.BufferDesc.Height = 0;													// height
 	scd.BufferDesc.RefreshRate.Numerator = 0;									// refresh rate: 0 -> do not care
@@ -107,7 +107,7 @@ void Graphics::Init(HWND app, SDL_Window* win)
 
 	//init sampler state
 
-	D3D11_SAMPLER_DESC sampDesc;
+	D3D11_SAMPLER_DESC sampDesc = {};
 
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -124,7 +124,7 @@ void Graphics::Init(HWND app, SDL_Window* win)
 	GetClientRect(m_hwnd, &winRect);
 
 	ID3D11Texture2D* pDepthStencil = NULL;
-	D3D11_TEXTURE2D_DESC descDepth;
+	D3D11_TEXTURE2D_DESC descDepth = {};
 
 	descDepth.Width = (FLOAT)(winRect.right - winRect.left);
 	descDepth.Height = (FLOAT)(winRect.bottom - winRect.top);
@@ -250,7 +250,7 @@ void Graphics::Resize(int w, int h)
 	// resize depth stencil
 
 	ID3D11Texture2D* pDepthStencil = NULL;
-	D3D11_TEXTURE2D_DESC descDepth;
+	D3D11_TEXTURE2D_DESC descDepth = {};
 
 	descDepth.Width = w;
 	descDepth.Height = h;
@@ -297,6 +297,7 @@ IndexBuffer Graphics::CreateIndexBuffer(uint32_t* indices, UINT indiceCount)
 	ib.Create(m_device.Get(), indices, indiceCount);
 	return ib;
 }
+
 
 void Graphics::DrawModel(Model& mod, DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Quaternion rotation)
 {
