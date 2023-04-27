@@ -97,7 +97,9 @@ void build_content(std::string srcDir, std::string dst)
 		{ ".png", new TextureCompiler },
 		{ ".tif", new TextureCompiler },
 		{ ".hlsl", new ShaderCompiler },
-		{ ".fbx", new ModelCompiler }
+		{ ".fbx", new ModelCompiler },
+		{ ".glb", new ModelCompiler },
+		{ ".gltf", new ModelCompiler },
 	};
 
 	std::vector<hash_entry> hash_entries;

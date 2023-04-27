@@ -86,7 +86,7 @@ void Game::Init()
 
 	float aspectRatio = 16.0 / 9.0f;
 	cam = STRB::CreateRef<Camera>();
-	cam->Init(30.0f, aspectRatio, 1.0f, 100.0f);
+	cam->Init(30.0f, aspectRatio, 1.0f, 1000.0f);
 	cam->SetPosition({ 1000.0f, 1000.0f, 0.0f});
 	m_graphics->SetActiveCamera(cam);
 
@@ -229,7 +229,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 	for (int i = 0; i < chunkQueue.size(); i++)
 	{
-		renderer->DrawModel(*chunkQueue[i], { 0.0f, 0.0f, 72.0f * i });
+		renderer->DrawModel(*chunkQueue[i], { 0.0f, 0.0f, 71.0f * i });
 	}
 
 	renderer->DrawModel(*train, trainPos);
