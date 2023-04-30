@@ -70,7 +70,9 @@ void Game::Init()
 
 	content.Init("data", *m_graphics.get());
 
-	debug = content.LoadFont("font/comic");
+	debugFont = content.LoadFont("font/roboto-16");
+	scoreFont = content.LoadFont("font/roboto-32");
+
 	train = content.LoadModel("model/train/mdl_train");
 	railModel = content.LoadModel("model/rail/Tory");
 
@@ -202,7 +204,7 @@ void Game::Update(Timer& time)
 		if (Input.IsKeyPressed(SDLK_r))
 		{
 			railQueue[currentRail].rot.z += 90;
-			std::cout << railQueue[currentRail].rot.z << std::endl;
+			//std::cout << railQueue[currentRail].rot.z << std::endl;
 		}
 	}
 
@@ -243,8 +245,8 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 
 	if (debugMode)
 	{
-		renderer->DrawString("FPS: " + std::to_string(fps), { 10.0f, 0.0f }, *debug);
-		renderer->DrawString("Delta: " + std::to_string(deltaTime), { 10.0f, 35.0f }, *debug);
+		renderer->DrawString("FPS: " + std::to_string(fps), { 5.0f, 0.0f }, *debugFont);
+		renderer->DrawString("Delta: " + std::to_string(deltaTime), { 5.0f, 20.0f }, *debugFont);
 
 		// debug ui
 
@@ -267,7 +269,7 @@ void Game::Draw(STRB::Ref<Graphics> renderer)
 	}
 	else
 	{
-		renderer->DrawString("Score: " + std::to_string(currentRail), { 550, 80.0f }, *debug);
+		renderer->DrawString("Score: " + std::to_string(currentRail), { 550, 80.0f }, *scoreFont);
 	}
 	
 	renderer->Present();

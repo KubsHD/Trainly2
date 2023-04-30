@@ -36,7 +36,8 @@ private:
 	STRB::Ref<Model> train;
 	STRB::Ref<Model> rail;
 
-	STRB::Ref<Font> debug;
+	STRB::Ref<Font> debugFont;
+	STRB::Ref<Font> scoreFont;
 
 	STRB::Ref<Camera> cam;
 };
