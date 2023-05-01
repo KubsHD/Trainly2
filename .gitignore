@@ -10,9 +10,10 @@ Release/
 *.pdb
 *.obj
 .DS_Store
-Trainly/data/model
 tools/fontbm/
 art/
 .idea/
 cmake-build-*
 out/
+*.blend
+*.blend1
